@@ -4,17 +4,14 @@ using UnityEngine;
 
 [System.Serializable]
 public class RoadSegment {
-    public float length;
-    public float radius;
-    public float theta;
-    public float width = 160.0f;
-    static readonly float DIV_THETA = 5.0f;
 
-    public override string ToString()
-    {
-        return $"length({length}) , radius({radius}) , theta({theta})";
-    }
+    public float length; // 直線距離 [単位10cm]
+    public float radius; // 旋回半径 [単位10cm]
+    public float theta;  // 旋回角度 [度、時計回りが正]。0を設定すると曲線が描画されず直線のみとなる。
+    public float width = 1.6f; // 道路の幅の半分 [単位10cm] ETロボコンの道路幅32cmを再現する場合は1.6とする。
+    static readonly float DIV_THETA = 5.0f; // カーブの分割角度
 
+    // 道路セグメントの頂点列を作成する。
     public List<Vector3> makeVertices()
     {
         var vertices=new List<Vector3>();
@@ -83,15 +80,17 @@ public class RoadSegment {
 public class RoadScript : MonoBehaviour
 {
 
-    // セグメントリスト。道路の形状を設定する。
+    // セグメントリスト。ここで道路の形状を設定する。
     public List<RoadSegment> segments;
 
-    private List<Vector3> points;
+    // 頂点列
     private List<Vector3> vertices;
+    // 三角形列
     private List<int> triangles;
+    // テクスチャ用UV列
     private List<Vector2> uvs;
 
-    // 全てのセグメントをつなぐ。
+    // 全てのセグメントの頂点列をつないで、三角形列、テクスチャ用UV列を生成する。
     void makeVerticesFromSegments()
     {
         if (segments != null)
@@ -102,16 +101,27 @@ public class RoadScript : MonoBehaviour
 
             foreach (var seg in segments)
             {
-                var v = seg.makeVertices();
-                foreach (var vt in v)
+                var seg_vertices = seg.makeVertices();
+                // 回転行列
+                var q = Quaternion.AngleAxis(theta, Vector3.up);
+
+                if (vertices.Count > 1)
                 {
-                    vertices.Add(Quaternion.AngleAxis(theta, Vector3.up) * vt + pos);
+                    // 接続位置の座標は重複するので削除する。
+                    vertices.RemoveRange(vertices.Count - 2, 2);
                 }
+                // 接続位置の座標と向きを使って回転・移動させる。
+                foreach (var vt in seg_vertices)
+                {
+                    vertices.Add(q * vt + pos);
+                }
+                // 次の接続位置の座標と向きを計算する。
                 pos = (vertices[vertices.Count - 2] + vertices[vertices.Count - 1])/2;
                 theta += seg.theta;
             }
         }
 
+        // 頂点列の並びから、三角形列は下記のように決定できる。
         triangles = new List<int>();
         for (int i = 0; i < (vertices.Count - 2); i += 2)
         {
@@ -123,6 +133,7 @@ public class RoadScript : MonoBehaviour
             triangles.Add(i + 3);
         }
 
+        // UV列は道路テクスチャのパターンを繰り返し適用するため、下記のように設定する。
         uvs = new List<Vector2>();
         for (int i = 0; i < vertices.Count; i += 2)
         {
@@ -138,15 +149,15 @@ public class RoadScript : MonoBehaviour
 
        if (segments != null)
        {
+            // Meshに頂点列、三角形列、UV列を設定する。
             var mesh = new Mesh();
-            var p = new Vector3(0, 0, 0);
-
             makeVerticesFromSegments();
             mesh.SetVertices(vertices);
             mesh.SetTriangles(triangles, 0);
-            mesh.RecalculateNormals();
+            mesh.RecalculateNormals(); // 法線の再計算をしないとライティングがバグる。
             mesh.SetUVs(0, uvs);
 
+            // MeshFilterにMeshを設定すると、MeshRendererがいい感じで道路を描画してくれる。
             var meshFilter = GetComponent<MeshFilter>();
             meshFilter.mesh = mesh;
         }
@@ -157,5 +168,11 @@ public class RoadScript : MonoBehaviour
     void Update()
     {
         
+    }
+
+    void OnValidate()
+    {
+        // RoadSegmentに変更があったときに再描画する。
+        Start();
     }
 }
