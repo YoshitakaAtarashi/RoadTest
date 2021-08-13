@@ -7,7 +7,7 @@ public class RoadSegment {
     public float length;
     public float radius;
     public float theta;
-    public float width = 1.0f;
+    public float width = 16.0f;
     static readonly float DIV_THETA = 5.0f;
 
     public override string ToString()
