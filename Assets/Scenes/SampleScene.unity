@@ -214,7 +214,7 @@ Transform:
   m_GameObject: {fileID: 157113191}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 5430, y: 1, z: 3660}
+  m_LocalScale: {x: 5.43, y: 1, z: 3.66}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -389,7 +389,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 963194225}
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 900, z: 0}
+  m_LocalPosition: {x: 0, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -427,10 +427,38 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   segments:
-  - length: 100
-    radius: 300
+  - length: 1
+    radius: 0.3
+    theta: 90
+    width: 0.16
+  - length: 1
+    radius: 0.3
+    theta: 90
+    width: 0.16
+  - length: 2
+    radius: 0.5
+    theta: 45
+    width: 0.16
+  - length: 2
+    radius: 0.5
+    theta: -45
+    width: 0.16
+  - length: 1
+    radius: 0.5
+    theta: 180
+    width: 0.16
+  - length: 3
+    radius: 0
+    theta: 90
+    width: 0.16
+  - length: 0.7
+    radius: 0.24
     theta: -90
-    width: 16
+    width: 0.16
+  - length: 0.6
+    radius: 0
+    theta: 0
+    width: 0.16
 --- !u!4 &1357160556
 Transform:
   m_ObjectHideFlags: 0
