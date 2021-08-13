@@ -28,53 +28,49 @@ public class RoadSegment {
             vertices.Add(new Vector3(+width, 0, length));
         }
 
-        if (radius > 0)
+        if (theta > 0)
         {
-            if (theta > 0)
+            // 時計回り
+            for (int i = 0; i < (int)(theta / DIV_THETA); i++)
             {
-                // 時計回り
-                for (int i = 0; i < (int)(theta / DIV_THETA); i++)
-                {
-                    float t = (float)(DIV_THETA * i) * Mathf.Deg2Rad;
-                    var v_out = new Vector3(radius - (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_out);
-                    var v_in = new Vector3(radius - (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_in);
-                }
-                {
-                    float t = theta * Mathf.Deg2Rad;
-                    var v_out = new Vector3(radius - (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_out);
-                    var v_in = new Vector3(radius - (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_in);
-                }
+                float t = (float)(DIV_THETA * i) * Mathf.Deg2Rad;
+                var v_out = new Vector3(radius - (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
+                vertices.Add(v_out);
+                var v_in = new Vector3(radius - (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
+                vertices.Add(v_in);
             }
-            else if (theta < 0)
             {
-                // 反時計回り
-                for (int i = 0; i < (int)(-theta / DIV_THETA); i++)
-                {
-                    float t = (float)(DIV_THETA * i) * Mathf.Deg2Rad;
-                    var v_in = new Vector3(-radius + (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_in);
-                    var v_out = new Vector3(-radius + (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_out);
-                }
-                {
-                    float t = -theta * Mathf.Deg2Rad;
-                    var v_in = new Vector3(-radius + (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_in);
-                    var v_out = new Vector3(-radius + (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
-                    vertices.Add(v_out);
-                }
+                float t = theta * Mathf.Deg2Rad;
+                var v_out = new Vector3(radius - (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
+                vertices.Add(v_out);
+                var v_in = new Vector3(radius - (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
+                vertices.Add(v_in);
+            }
+        }
+        else if (theta < 0)
+        {
+            // 反時計回り
+            for (int i = 0; i < (int)(-theta / DIV_THETA); i++)
+            {
+                float t = (float)(DIV_THETA * i) * Mathf.Deg2Rad;
+                var v_in = new Vector3(-radius + (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
+                vertices.Add(v_in);
+                var v_out = new Vector3(-radius + (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
+                vertices.Add(v_out);
+            }
+            {
+                float t = -theta * Mathf.Deg2Rad;
+                var v_in = new Vector3(-radius + (radius - width) * Mathf.Cos(t), 0, (radius - width) * Mathf.Sin(t) + length);
+                vertices.Add(v_in);
+                var v_out = new Vector3(-radius + (radius + width) * Mathf.Cos(t), 0, (radius + width) * Mathf.Sin(t) + length);
+                vertices.Add(v_out);
+            }
 
-            }
         }
 
         triangles = new List<int>();
         for (int i = 0; i < (vertices.Count-2); i+=2)
         {
-            Debug.Log(vertices[i]);
             triangles.Add(i + 0);
             triangles.Add(i + 2);
             triangles.Add(i + 1);
@@ -133,6 +129,16 @@ public class RoadScript : MonoBehaviour
                 seg.makeVertices(out vertices, out triangles);
                 mesh.SetVertices(vertices);
                 mesh.SetTriangles(triangles, 0);
+                mesh.RecalculateNormals();
+
+                var uvs = new List<Vector2>();
+                for (int i=0; i < vertices.Count; i+=2)
+                {
+                    uvs.Add(new Vector2(0, i/2));
+                    uvs.Add(new Vector2(1, i/2));
+                }
+                mesh.SetUVs(0, uvs);
+
             }
 
             var meshFilter = GetComponent<MeshFilter>();
